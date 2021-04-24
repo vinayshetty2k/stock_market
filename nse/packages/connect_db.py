@@ -14,22 +14,23 @@ class ConnectMethods():
 
     def populate_data(self, insert_Query, path):
         try:
-            log_file = open('query.log', 'w')
+            log_file = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'query.log'), 'w')
             self.connectDB()
             cursor = self.connection.cursor()
             for filename in glob.glob(path):
                 try:
                     cursor.execute(insert_Query%filename)
                     self.connection.commit()
-                except (Exception, psycopg2.Error) as err:
+                except (Exception, psycopg2.Error) as error:
                     cursor.execute('rollback;')
-                    if 'duplicate key value violates unique constraint' in str(err):
-                        log_file.write('Already exists - %s\n'%filename)
+                    if 'duplicate key value violates unique constraint' in str(error):
+                        pass
                     else:
                         log_file.write('Pending - %s\n'%filename)
-                    print(err, filename)
+                        log_file.write(str(error))
+
         except (Exception, psycopg2.Error) as error:
-            print(error)
+            log_file.write(str(error))
 
         finally:
             log_file.close()
@@ -41,32 +42,37 @@ class ConnectMethods():
 
     def retrieve_data(self, select_Query):
         try:
+            log_file = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'query.log'), 'w')
             self.connectDB()
             cursor = self.connection.cursor()
             cursor.execute(select_Query)
             db_data = cursor.fetchall()
-            return db_data
-        except (Exception, psycopg2.Error) as err:
-            print(err)
-            return ''
+        except (Exception, psycopg2.Error) as error:
+            db_data = ''
+            log_file.write(str(error))
 
         finally:
+            log_file.close()
             # closing database connection.
             if (self.connection):
                 cursor.close()
                 self.connection.close()
 
+            return db_data
+
 
     def delete_data(self, delete_Query):
         try:
+            log_file = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'query.log'), 'w')
             self.connectDB()
             cursor = self.connection.cursor()
             cursor.execute(delete_Query)
             self.connection.commit()
         except (Exception, psycopg2.Error) as error:
-            print(error)
+            log_file.write(str(error))
 
         finally:
+            log_file.close()
             # closing database connection.
             if (self.connection):
                 cursor.close()
@@ -75,21 +81,21 @@ class ConnectMethods():
 
     def insert_data(self, insert_Query):
         try:
-            log_file = open('query.log', 'w')
+            log_file = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'query.log'), 'w')
             self.connectDB()
             cursor = self.connection.cursor()
             try:
                 cursor.execute(insert_Query)
                 self.connection.commit()
-            except (Exception, psycopg2.Error) as err:
+            except (Exception, psycopg2.Error) as error:
                 cursor.execute('rollback;')
-                if 'duplicate key value violates unique constraint' in str(err):
-                    print('duplicate')
+                if 'duplicate key value violates unique constraint' in str(error):
+                    pass
                 else:
                     log_file.write('Pending - %s\n'%insert_Query)
-                print(err)
-        except (Exception, psycopg2.Error) as err:
-            print(err)
+                    log_file.write(str(error))
+        except (Exception, psycopg2.Error) as error:
+            log_file.write(str(error))
 
         finally:
             log_file.close()

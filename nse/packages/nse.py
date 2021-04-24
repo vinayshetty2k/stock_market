@@ -257,7 +257,7 @@ class Nse(AbstractBaseExchange):
             else:
                 return ''
         except Exception as err:
-            print(err)
+            print(url)
             return ""
 
     def get_json_data(self, json_url, as_json=False):
@@ -342,7 +342,8 @@ class Nse(AbstractBaseExchange):
                 'Accept-Language': 'en-US,en;q=0.5',
                 'Host': 'www1.nseindia.com',
                 'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:28.0) Gecko/20100101 Firefox/28.0',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Referer': 'https://www1.nseindia.com/products/content/equities/equities/archieve_eq.htm'
                 }
 
     def nse_opener(self):
