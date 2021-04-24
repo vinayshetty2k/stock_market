@@ -15,8 +15,8 @@ def main():
         instrument_type = sys.argv[2].strip()
         process = sys.argv[3].strip()
         classRef = ConnectMethods()
+        log_file = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'bhavcopy_download.log'), 'w')
         if process == 'download':
-            log_file = open('bhavcopy_download.log', 'w')
             start_date = sys.argv[4].strip()
             if start_date == 'False':    start_date = False
             end_date = sys.argv[5].strip()
@@ -42,16 +42,17 @@ def main():
             delta = datetime.timedelta(days=1)
             while start_date < end_date:
                 try:
-                    pass
-                    # nse.save_bhavcopy(start_date, instrument_type, path)
+                    market_open = True
+                    nse.save_bhavcopy(start_date, instrument_type, path)
                 except Exception as err:
+                    market_open = False
                     day_name = start_date.strftime("%A")
                     if (day_name not in ['Saturday', 'Sunday']):
-                        log_file.write(str(start_date))
+                        log_file.write(f'Market closed om {start_date}')
                         print(err)
 
 ########################### INDEX ######################################################
-                if instrument_type == 'cash':
+                if instrument_type == 'cash' and market_open:
                     url = f'https://www1.nseindia.com/content/indices/ind_close_all_{start_date.strftime("%d%m%Y")}.csv'
                     nse_data = nse.get_csv_data(url)
                     if nse_data:
@@ -101,5 +102,6 @@ def main():
                 print(db_data)
                 return db_data
     except Exception as err:
-        print(err)
+        exception_type, exception_object, exception_traceback = sys.exc_info()
+        print(exception_traceback.tb_lineno)
 main()
